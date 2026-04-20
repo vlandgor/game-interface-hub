@@ -3,92 +3,192 @@
 <head>
     <title>Game UI Hub</title>
     <style>
-        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 50px; background: #1e1e1e; color: white; }
-
-        #drop-zone {
-            width: 500px; height: 300px; border: 3px dashed #555;
-            border-radius: 15px; display: flex; align-items: center;
-            justify-content: center; transition: 0.3s;
-            margin-bottom: 40px; /* Added some space below the box */
+        /* Base Layout */
+        body {
+            font-family: 'Inter', sans-serif; /* A more modern UI font */
+            margin: 0;
+            background: #121212; /* Darker background like the reference */
+            color: #efefef;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
         }
 
-        #drop-zone.hover { border-color: #4cc9f0; background: #2a2a2a; transform: scale(1.02); }
+        /* --- Header --- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            height: 56px;
+            background: #000;
+            border-bottom: 1px solid #282828;
+        }
 
-        /* --- New Gallery Styles --- */
+        .logo {
+            font-weight: 800;
+            font-size: 0.9rem;
+            letter-spacing: 1.5px;
+            color: #fff;
+        }
+
+        nav { display: flex; align-items: center; gap: 20px; }
+
+        #platform-selector {
+            background: transparent;
+            color: #aaa;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        /* --- Layout Grid --- */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar - Left */
+        aside {
+            width: 240px;
+            background: #181818;
+            border-right: 1px solid #282828;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .filter-section h4 {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: #666;
+            letter-spacing: 1px;
+            margin: 0 0 12px 0;
+        }
+
+        .filter-item {
+            font-size: 0.9rem;
+            color: #bbb;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+
+        /* Content Area - Right */
+        main {
+            flex: 1;
+            background: #121212;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* Components */
+        #drop-zone {
+            width: 100%;
+            height: 100px;
+            border: 1px dashed #333; /* Base state */
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            margin-bottom: 30px;
+            transition: all 0.2s ease; /* Smooth transition */
+        }
+
+        #drop-zone.hover {
+            border: 2px dashed #4cc9f0 !important; /* Bright blue from your previous version */
+            background: #1a262b !important; /* Slight blue tint to the background */
+            color: #4cc9f0 !important;
+        }
+
         #gallery {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
         }
 
         .screenshot-card {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            border-radius: 12px;
+            background: #1c1c1c;
+            border-radius: 6px;
             overflow: hidden;
-            text-align: center;
-            padding-bottom: 10px;
+            border: 1px solid #282828;
         }
 
-        .screenshot-card img {
+        .card-preview {
             width: 100%;
-            height: auto;
-            display: block;
-            margin-bottom: 10px;
+            aspect-ratio: 16/9;
+            background: #252525; /* Placeholder color */
+        }
+
+        .card-meta {
+            padding: 12px;
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
-<div id="drop-zone">Drag and drop a game screenshot here</div>
-<div id="gallery"></div>
 
-<script>
-    const zone = document.getElementById('drop-zone');
+<header>
+    <div class="logo">GAME UI HUB</div>
+    <nav>
+        <select id="platform-selector">
+            <option value="0">All Platforms</option>
+            <option value="1">Desktop</option>
+            <option value="2">Mobile</option>
+            <option value="3">VR</option>
+        </select>
+    </nav>
+    <div style="font-size: 0.85rem; color: #444;">Search...</div>
+</header>
 
-    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
-    zone.ondragleave = () => zone.classList.remove('hover');
+<div class="main-container">
+    <aside>
+        <div class="filter-section">
+            <h4>Categories</h4>
+            <div class="filter-item">HUD</div>
+            <div class="filter-item">Main Menu</div>
+            <div class="filter-item">Inventory</div>
+        </div>
 
-    zone.ondrop = async (e) => {
-        e.preventDefault();
-        zone.classList.remove('hover');
+        <div class="filter-section">
+            <h4>Tags</h4>
+            <div class="filter-item">Minimalist</div>
+            <div class="filter-item">Sci-Fi</div>
+            <div class="filter-item">Fantasy</div>
+        </div>
 
-        const file = e.dataTransfer.files[0];
-        const formData = new FormData();
-        formData.append('file', file); // 'file' must match the parameter name in your Controller
+        <div class="filter-section">
+            <h4>Orientation</h4>
+            <div class="filter-item">Landscape</div>
+            <div class="filter-item">Portrait</div>
+        </div>
+    </aside>
 
-        const response = await fetch('http://localhost:5069/api/screenshots/upload', {
-            method: 'POST',
-            body: formData
-        });
+    <main>
+        <div id="drop-zone">Drag and drop screenshots to upload</div>
 
-        if (response.ok) {
-            await loadGallery();
-        } else {
-            alert('Upload failed!');
-        }
-    };
-
-    async function loadGallery() {
-        try {
-            const response = await fetch('http://localhost:5069/api/screenshots');
-            const screenshots = await response.json();
-            const gallery = document.getElementById('gallery');
-
-            gallery.innerHTML = screenshots.map(s => `
-                    <div class="screenshot-card">
-                        <img src="${s.filePath}" alt="${s.gameTitle}">
-                        <div><strong>${s.gameTitle || 'Untitled'}</strong></div>
-                        <small>${new Date(s.uploadedAt).toLocaleDateString()}</small>
-                    </div>
-                `).join('');
-        } catch (err) {
-            console.error("Failed to load gallery:", err);
-        }
-    }
-
-    loadGallery();
-</script>
+        <div id="gallery">
+            <div class="screenshot-card">
+                <div class="card-preview"></div>
+                <div class="card-meta">
+                    <strong>Sample Title</strong><br>
+                    <span style="color: #666">Desktop • HUD</span>
+                </div>
+            </div>
+            <div class="screenshot-card">
+                <div class="card-preview"></div>
+                <div class="card-meta">
+                    <strong>Sample Title</strong><br>
+                    <span style="color: #666">Mobile • Menu</span>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+<script src="app.js"></script>
 </body>
 </html>

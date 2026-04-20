@@ -21,7 +21,7 @@ public class ScreenshotsController : ControllerBase
     }
 
     [HttpPost("upload")]
-    public async Task<IActionResult> Upload(IFormFile file)
+    public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] int platform)
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file selected.");
@@ -29,19 +29,19 @@ public class ScreenshotsController : ControllerBase
         using var stream = file.OpenReadStream();
         var relativePath = await _imageService.SaveImageAsync(stream, file.FileName);
 
-        // --- NEW: Save the metadata to the Database ---
         var screenshotRecord = new Screenshot
         {
             FileName = file.FileName,
             FilePath = relativePath,
-            GameTitle = "Unknown", // We can add a field to the UI later for this
+            GameTitle = "New Prototype", 
             Category = "UI",
-            UploadedAt = DateTime.UtcNow
+            UploadedAt = DateTime.UtcNow,
+            // Cast the integer from the UI (0, 1, 2, 3) to your PlatformType Enum
+            Platform = (PlatformType)platform 
         };
 
         _context.Screenshots.Add(screenshotRecord);
         await _context.SaveChangesAsync();
-        // ----------------------------------------------
 
         return Ok(new { path = relativePath, id = screenshotRecord.Id });
     }
