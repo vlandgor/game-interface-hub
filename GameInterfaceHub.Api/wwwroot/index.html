@@ -1,10 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <title>Game UI Hub</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #1e1e1e; color: white; }
+        #drop-zone {
+            width: 500px; height: 300px; border: 3px dashed #555;
+            border-radius: 15px; display: flex; align-items: center;
+            justify-content: center; transition: 0.3s;
+        }
+        #drop-zone.hover { border-color: #4cc9f0; background: #2a2a2a; transform: scale(1.02); }
+    </style>
 </head>
 <body>
-$END$
+<div id="drop-zone">Drag and drop a game screenshot here</div>
+
+<script>
+    const zone = document.getElementById('drop-zone');
+
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
+    zone.ondragleave = () => zone.classList.remove('hover');
+
+    zone.ondrop = async (e) => {
+        e.preventDefault();
+        zone.classList.remove('hover');
+
+        const file = e.dataTransfer.files[0];
+        const formData = new FormData();
+        formData.append('file', file); // 'file' must match the parameter name in your Controller
+
+        const response = await fetch('http://localhost:5069/api/screenshots/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            alert('Uploaded to: ' + data.path);
+        } else {
+            alert('Upload failed!');
+        }
+    };
+</script>
 </body>
 </html>

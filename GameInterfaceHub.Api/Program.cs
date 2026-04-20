@@ -10,6 +10,16 @@ builder.Services.AddScoped<IImageService, LocalImageService>();
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:63342") // The port from your screenshot
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -18,6 +28,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
+app.UseCors();
 app.UseHttpsRedirection();
 
 var summaries = new[]
