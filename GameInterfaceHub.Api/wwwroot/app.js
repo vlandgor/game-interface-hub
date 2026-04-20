@@ -1,21 +1,41 @@
 const zone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('file-input');
 
-zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
-zone.ondragleave = () => zone.classList.remove('hover');
+// --- Click to Upload Logic ---
+zone.onclick = () => fileInput.click();
+
+fileInput.onchange = (e) => {
+    if (e.target.files.length > 0) {
+        handleUpload(e.target.files[0]);
+    }
+};
+
+// --- Drag and Drop Logic ---
+zone.ondragover = (e) => {
+    e.preventDefault();
+    zone.classList.add('hover');
+};
+
+zone.ondragleave = (e) => {
+    zone.classList.remove('hover');
+};
 
 zone.ondrop = async (e) => {
     e.preventDefault();
     zone.classList.remove('hover');
 
-    const file = e.dataTransfer.files[0];
+    if (e.dataTransfer.files.length > 0) {
+        handleUpload(e.dataTransfer.files[0]);
+    }
+};
 
-    // 1. Grab the platform value from the header dropdown
+// --- Unified Upload Function ---
+async function handleUpload(file) {
     const platformSelector = document.getElementById('platform-selector');
     const platformValue = platformSelector ? platformSelector.value : 0;
 
     const formData = new FormData();
     formData.append('file', file);
-    // 2. Add the platform to the request
     formData.append('platform', platformValue);
 
     const response = await fetch('/api/screenshots/upload', {
@@ -25,10 +45,11 @@ zone.ondrop = async (e) => {
 
     if (response.ok) {
         await loadGallery();
+        fileInput.value = ''; // Reset input so same file can be uploaded twice if needed
     } else {
         console.error("Upload failed");
     }
-};
+}
 
 async function loadGallery() {
     try {
@@ -36,7 +57,6 @@ async function loadGallery() {
         const screenshots = await response.json();
         const gallery = document.getElementById('gallery');
 
-        // 3. Map the data using your new schematic CSS classes
         gallery.innerHTML = screenshots.map(s => {
             const platforms = ["Uncategorized", "Desktop", "Mobile", "VR"];
             const platformLabel = platforms[s.platform] || "Uncategorized";
