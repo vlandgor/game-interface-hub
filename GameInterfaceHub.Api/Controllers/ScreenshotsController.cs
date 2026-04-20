@@ -1,4 +1,6 @@
+using GameInterfaceHub.Core.Data;
 using GameInterfaceHub.Core.Interfaces;
+using GameInterfaceHub.Core.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GameInterfaceHub.Api.Controllers;
@@ -8,11 +10,13 @@ namespace GameInterfaceHub.Api.Controllers;
 public class ScreenshotsController : ControllerBase
 {
     private readonly IImageService _imageService;
+    private readonly AppDbContext _context;
 
     // The API project "injects" the service here automatically
-    public ScreenshotsController(IImageService imageService)
+    public ScreenshotsController(IImageService imageService, AppDbContext context)
     {
         _imageService = imageService;
+        _context = context;
     }
 
     [HttpPost("upload")]
@@ -21,13 +25,23 @@ public class ScreenshotsController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file selected.");
 
-        // Open the stream from the uploaded file
         using var stream = file.OpenReadStream();
-        
-        // Save it using our Core service
         var relativePath = await _imageService.SaveImageAsync(stream, file.FileName);
 
-        // Return a 200 OK with the path where the file is stored
-        return Ok(new { path = relativePath });
+        // --- NEW: Save the metadata to the Database ---
+        var screenshotRecord = new Screenshot
+        {
+            FileName = file.FileName,
+            FilePath = relativePath,
+            GameTitle = "Unknown", // We can add a field to the UI later for this
+            Category = "UI",
+            UploadedAt = DateTime.UtcNow
+        };
+
+        _context.Screenshots.Add(screenshotRecord);
+        await _context.SaveChangesAsync();
+        // ----------------------------------------------
+
+        return Ok(new { path = relativePath, id = screenshotRecord.Id });
     }
 }

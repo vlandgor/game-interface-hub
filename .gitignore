@@ -6,7 +6,15 @@
 ._*
 
 # Custom folder icons
-Icon
+Icon
+
+*.db
+*.db-shm
+*.db-wal
+
+# Ignore uploaded media files
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.gitkeep
 
 # Volume root files
 .DocumentRevisions-V100
