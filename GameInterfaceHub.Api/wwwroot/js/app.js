@@ -3,62 +3,59 @@ document.addEventListener('DOMContentLoaded', () => {
     const zone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const gallery = document.getElementById('gallery');
+    const platformSelector = document.getElementById('platform-selector');
 
-    // Staging Panel Elements
+    // Staging (Upload) Panel Elements
     const uploadPanel = document.getElementById('upload-panel');
     const stagingPreview = document.getElementById('staging-preview');
-    const btnCancel = document.getElementById('btn-cancel');
-    const btnConfirm = document.getElementById('btn-confirm-upload');
-
-    // Form Inputs
+    const btnCancelUpload = document.getElementById('btn-cancel');
+    const btnConfirmUpload = document.getElementById('btn-confirm-upload');
     const inputGameTitle = document.getElementById('input-game-title');
     const inputPlatform = document.getElementById('input-platform');
 
-    const platformSelector = document.getElementById('platform-selector');
+    // Detail (Viewer) Panel Elements
+    const detailPanel = document.getElementById('detail-panel');
+    const detailPreview = document.getElementById('detail-preview');
+    const detailTitle = document.getElementById('detail-title');
+    const detailPlatformLabel = document.getElementById('detail-platform-label');
+    const detailDate = document.getElementById('detail-date');
+    const btnCloseDetail = document.getElementById('btn-close-detail');
+    const btnDelete = document.getElementById('btn-delete-screenshot');
 
+    // --- State ---
     let pendingFile = null;
+    let currentScreenshots = []; // Cache for current gallery items
+    let currentViewId = null;
 
     // --- 1. Initial Load ---
     loadGallery();
 
-    // --- 2. File Selection (Click & Drag/Drop) ---
+    // --- 2. Event Listeners ---
+
+    // Header Filter
+    platformSelector.onchange = () => loadGallery(platformSelector.value);
+
+    // Upload Interactions
     zone.onclick = () => fileInput.click();
-
     fileInput.onchange = (e) => {
-        if (e.target.files.length > 0) {
-            prepareStaging(e.target.files[0]);
-        }
+        if (e.target.files.length > 0) prepareStaging(e.target.files[0]);
     };
 
-    zone.ondragover = (e) => {
-        e.preventDefault();
-        zone.classList.add('hover');
-    };
-
+    zone.ondragover = (e) => { e.preventDefault(); zone.classList.add('hover'); };
     zone.ondragleave = () => zone.classList.remove('hover');
-
     zone.ondrop = (e) => {
         e.preventDefault();
         zone.classList.remove('hover');
-        if (e.dataTransfer.files.length > 0) {
-            prepareStaging(e.dataTransfer.files[0]);
-        }
+        if (e.dataTransfer.files.length > 0) prepareStaging(e.dataTransfer.files[0]);
     };
 
-    // Listen for changes on the header dropdown
-    platformSelector.onchange = () => {
-        loadGallery(platformSelector.value);
-    };
-
-    // --- 3. Staging Logic ---
+    // --- 3. Staging (Upload) Logic ---
     function prepareStaging(file) {
         pendingFile = file;
-
-        // Create local preview
         const reader = new FileReader();
         reader.onload = (e) => {
             stagingPreview.src = e.target.result;
-            uploadPanel.style.display = 'flex'; // Show modal
+            uploadPanel.style.display = 'flex';
         };
         reader.readAsDataURL(file);
     }
@@ -66,14 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function closeStaging() {
         uploadPanel.style.display = 'none';
         pendingFile = null;
-        fileInput.value = ''; // Clear input
-        inputGameTitle.value = ''; // Reset form
+        fileInput.value = '';
+        inputGameTitle.value = '';
     }
 
-    btnCancel.onclick = closeStaging;
+    btnCancelUpload.onclick = closeStaging;
 
-    // --- 4. Final Upload to API ---
-    btnConfirm.onclick = async () => {
+    btnConfirmUpload.onclick = async () => {
         if (!pendingFile) return;
 
         const formData = new FormData();
@@ -89,39 +85,76 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 closeStaging();
-                await loadGallery();
-            } else {
-                alert("Upload failed. Check server logs.");
+                await loadGallery(platformSelector.value);
             }
         } catch (err) {
             console.error("Upload error:", err);
         }
     };
 
+    // --- 4. Detail View & Delete Logic ---
+    function openDetail(id) {
+        const screenshot = currentScreenshots.find(s => s.id === id);
+        if (!screenshot) return;
+
+        currentViewId = id;
+        detailPreview.src = `/${screenshot.filePath}`;
+        detailTitle.innerText = screenshot.gameTitle || 'Untitled';
+
+        const platforms = ["Uncategorized", "Desktop", "Mobile", "VR"];
+        detailPlatformLabel.innerText = platforms[screenshot.platform] || "Uncategorized";
+        detailDate.innerText = new Date(screenshot.uploadedAt).toLocaleDateString();
+
+        detailPanel.style.display = 'flex';
+    }
+
+    function closeDetail() {
+        detailPanel.style.display = 'none';
+        currentViewId = null;
+    }
+
+    btnCloseDetail.onclick = closeDetail;
+
+    btnDelete.onclick = async () => {
+        if (!currentViewId) return;
+
+        if (!confirm("Are you sure you want to delete this screenshot? This cannot be undone.")) return;
+
+        try {
+            const response = await fetch(`/api/screenshots/${currentViewId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                closeDetail();
+                await loadGallery(platformSelector.value);
+            }
+        } catch (err) {
+            console.error("Delete error:", err);
+        }
+    };
+
+    // --- 5. Gallery Rendering ---
     async function loadGallery(platformId = 0) {
         try {
-            // Pass the platformId as a query parameter
-            // If 0 (All Platforms), we fetch everything
             const url = platformId == 0
                 ? '/api/screenshots'
                 : `/api/screenshots?platform=${platformId}`;
 
             const response = await fetch(url);
-            const screenshots = await response.json();
+            currentScreenshots = await response.json(); // Save to state
 
-            const gallery = document.getElementById('gallery');
-
-            if (screenshots.length === 0) {
-                gallery.innerHTML = '<div style="color: #666; padding: 20px;">No screenshots found for this platform.</div>';
+            if (currentScreenshots.length === 0) {
+                gallery.innerHTML = '<div style="color: #666; padding: 20px;">No screenshots found.</div>';
                 return;
             }
 
-            gallery.innerHTML = screenshots.map(s => {
+            gallery.innerHTML = currentScreenshots.map(s => {
                 const platforms = ["Uncategorized", "Desktop", "Mobile", "VR"];
                 const platformLabel = platforms[s.platform] || "Uncategorized";
 
                 return `
-                <div class="screenshot-card">
+                <div class="screenshot-card" data-id="${s.id}">
                     <img src="/${s.filePath}" alt="${s.gameTitle}" class="card-preview">
                     <div class="card-meta">
                         <strong>${s.gameTitle || 'Untitled'}</strong><br>
@@ -131,6 +164,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
             }).join('');
+
+            // Event Delegation: Attach click listener to cards
+            document.querySelectorAll('.screenshot-card').forEach(card => {
+                card.onclick = () => openDetail(card.getAttribute('data-id'));
+            });
+
         } catch (err) {
             console.error("Failed to load gallery:", err);
         }

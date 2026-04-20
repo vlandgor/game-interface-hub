@@ -66,4 +66,20 @@ public class ScreenshotsController : ControllerBase
     
         return Ok(screenshots);
     }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var screenshot = await _context.Screenshots.FindAsync(id);
+        if (screenshot == null) return NotFound();
+
+        // 1. Delete the physical file using your service
+        _imageService.DeleteImage(screenshot.FilePath);
+
+        // 2. Delete the DB record
+        _context.Screenshots.Remove(screenshot);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
