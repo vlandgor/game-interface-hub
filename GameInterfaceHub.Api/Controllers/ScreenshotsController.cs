@@ -2,6 +2,7 @@ using GameInterfaceHub.Core.Data;
 using GameInterfaceHub.Core.Interfaces;
 using GameInterfaceHub.Core.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GameInterfaceHub.Api.Controllers;
 
@@ -43,5 +44,16 @@ public class ScreenshotsController : ControllerBase
         // ----------------------------------------------
 
         return Ok(new { path = relativePath, id = screenshotRecord.Id });
+    }
+    
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        // You must explicitly tell it to use 's => s.UploadedAt'
+        var screenshots = await _context.Screenshots
+            .OrderByDescending(s => s.UploadedAt) 
+            .ToListAsync();
+        
+        return Ok(screenshots);
     }
 }
