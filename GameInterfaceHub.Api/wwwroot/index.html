@@ -64,8 +64,7 @@
         });
 
         if (response.ok) {
-            const data = await response.json();
-            alert('Uploaded to: ' + data.path);
+            await loadGallery();
         } else {
             alert('Upload failed!');
         }
