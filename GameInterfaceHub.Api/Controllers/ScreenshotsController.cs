@@ -21,7 +21,10 @@ public class ScreenshotsController : ControllerBase
     }
 
     [HttpPost("upload")]
-    public async Task<IActionResult> Upload([FromForm] IFormFile file, [FromForm] int platform)
+    public async Task<IActionResult> Upload(
+        [FromForm] IFormFile file, 
+        [FromForm] int platform, 
+        [FromForm] string gameTitle)
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file selected.");
@@ -33,11 +36,11 @@ public class ScreenshotsController : ControllerBase
         {
             FileName = file.FileName,
             FilePath = relativePath,
-            GameTitle = "New Prototype", 
+            GameTitle = gameTitle ?? "Untitled",
             Category = "UI",
             UploadedAt = DateTime.UtcNow,
             // Cast the integer from the UI (0, 1, 2, 3) to your PlatformType Enum
-            Platform = (PlatformType)platform 
+            Platform = (PlatformType)platform
         };
 
         _context.Screenshots.Add(screenshotRecord);
@@ -47,13 +50,20 @@ public class ScreenshotsController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int? platform)
     {
-        // You must explicitly tell it to use 's => s.UploadedAt'
-        var screenshots = await _context.Screenshots
+        var query = _context.Screenshots.AsQueryable();
+
+        // If a platform is specified and it's not 0 (All), filter the results
+        if (platform.HasValue && platform.Value != 0)
+        {
+            query = query.Where(s => (int)s.Platform == platform.Value);
+        }
+
+        var screenshots = await query
             .OrderByDescending(s => s.UploadedAt) 
             .ToListAsync();
-        
+    
         return Ok(screenshots);
     }
 }
