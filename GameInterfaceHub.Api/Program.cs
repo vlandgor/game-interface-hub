@@ -1,5 +1,7 @@
+using GameInterfaceHub.Core.Data;
 using GameInterfaceHub.Core.Interfaces;
 using GameInterfaceHub.Core.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,9 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<IImageService, LocalImageService>();
 
 builder.Services.AddControllers();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=gamehub.db"));
 
 builder.Services.AddCors(options =>
 {
