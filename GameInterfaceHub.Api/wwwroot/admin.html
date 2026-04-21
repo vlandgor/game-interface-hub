@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class="admin-container">
+    <h2>Manage Platforms</h2>
+    <input type="text" id="new-platform-name" placeholder="Platform Name (e.g. PS5)">
+    <button onclick="addPlatform()">Add Platform</button>
+
+    <ul id="platform-list"></ul>
+</div>
+
+<script>
+    async function loadPlatforms() {
+        const res = await fetch('/api/platforms');
+        const platforms = await res.json();
+        document.getElementById('platform-list').innerHTML = platforms.map(p => `
+            <li>${p.name} <button onclick="deletePlatform(${p.id})">Delete</button></li>
+        `).join('');
+    }
+
+    async function addPlatform() {
+        const nameInput = document.getElementById('new-platform-name');
+        const name = nameInput.value;
+
+        if (!name) return;
+
+        await fetch('/api/platforms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // Use "Name" with a capital N to match your C# model property
+            body: JSON.stringify({ Name: name })
+        });
+
+        nameInput.value = ''; // Clear input
+        loadPlatforms();
+    }
+
+    async function deletePlatform(id) {
+        await fetch(`/api/platforms/${id}`, { method: 'DELETE' });
+        loadPlatforms();
+    }
+
+    loadPlatforms();
+</script>
+</body>
+</html>

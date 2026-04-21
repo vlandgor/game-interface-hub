@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameInterfaceHub.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260420163841_InitialCreate")]
+    [Migration("20260421173050_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,6 +19,21 @@ namespace GameInterfaceHub.Core.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.6");
+
+            modelBuilder.Entity("GameInterfaceHub.Core.Models.Platform", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Platforms");
+                });
 
             modelBuilder.Entity("GameInterfaceHub.Core.Models.Screenshot", b =>
                 {
@@ -42,7 +57,7 @@ namespace GameInterfaceHub.Core.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("IsMobile")
+                    b.Property<int>("PlatformId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Tags")
@@ -54,7 +69,20 @@ namespace GameInterfaceHub.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PlatformId");
+
                     b.ToTable("Screenshots");
+                });
+
+            modelBuilder.Entity("GameInterfaceHub.Core.Models.Screenshot", b =>
+                {
+                    b.HasOne("GameInterfaceHub.Core.Models.Platform", "Platform")
+                        .WithMany()
+                        .HasForeignKey("PlatformId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Platform");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,7 +9,8 @@ public class Screenshot
     public string Category { get; set; } = string.Empty;
     public DateTime UploadedAt { get; set; } = DateTime.UtcNow;
     
-    public PlatformType Platform { get; set; }
+    public int PlatformId { get; set; }
+    public Platform? Platform { get; set; }
     
     public string Tags { get; set; } = string.Empty;
 }

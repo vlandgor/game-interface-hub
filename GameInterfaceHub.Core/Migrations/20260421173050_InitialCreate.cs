@@ -12,6 +12,19 @@ namespace GameInterfaceHub.Core.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Platforms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Platforms", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Screenshots",
                 columns: table => new
                 {
@@ -21,13 +34,24 @@ namespace GameInterfaceHub.Core.Migrations
                     GameTitle = table.Column<string>(type: "TEXT", nullable: false),
                     Category = table.Column<string>(type: "TEXT", nullable: false),
                     UploadedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
-                    IsMobile = table.Column<bool>(type: "INTEGER", nullable: false),
+                    PlatformId = table.Column<int>(type: "INTEGER", nullable: false),
                     Tags = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Screenshots", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Screenshots_Platforms_PlatformId",
+                        column: x => x.PlatformId,
+                        principalTable: "Platforms",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Screenshots_PlatformId",
+                table: "Screenshots",
+                column: "PlatformId");
         }
 
         /// <inheritdoc />
@@ -35,6 +59,9 @@ namespace GameInterfaceHub.Core.Migrations
         {
             migrationBuilder.DropTable(
                 name: "Screenshots");
+
+            migrationBuilder.DropTable(
+                name: "Platforms");
         }
     }
 }
