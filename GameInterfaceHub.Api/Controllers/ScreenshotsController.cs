@@ -23,6 +23,7 @@ public class ScreenshotsController : ControllerBase
     public async Task<IActionResult> Upload(
         [FromForm] IFormFile file, 
         [FromForm] int platformId, 
+        [FromForm] int categoryId,
         [FromForm] string gameTitle)
     {
         if (file == null || file.Length == 0)
@@ -31,6 +32,10 @@ public class ScreenshotsController : ControllerBase
         var platformExists = await _context.Platforms.AnyAsync(p => p.Id == platformId);
         if (!platformExists)
             return BadRequest("Invalid Platform ID.");
+        
+        var categoryExists = await _context.Categories.AnyAsync(c => c.Id == categoryId);
+        if (!categoryExists) 
+            return BadRequest("Invalid Category ID.");
 
         using var stream = file.OpenReadStream();
         var relativePath = await _imageService.SaveImageAsync(stream, file.FileName);
@@ -40,9 +45,9 @@ public class ScreenshotsController : ControllerBase
             FileName = file.FileName,
             FilePath = relativePath,
             GameTitle = gameTitle ?? "Untitled",
-            Category = "UI",
             UploadedAt = DateTime.UtcNow,
-            PlatformId = platformId
+            PlatformId = platformId,
+            CategoryId = categoryId
         };
 
         _context.Screenshots.Add(screenshotRecord);

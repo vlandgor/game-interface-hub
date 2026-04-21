@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameInterfaceHub.Core.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260421173050_InitialCreate")]
+    [Migration("20260421181501_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -19,6 +19,21 @@ namespace GameInterfaceHub.Core.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.6");
+
+            modelBuilder.Entity("GameInterfaceHub.Core.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
 
             modelBuilder.Entity("GameInterfaceHub.Core.Models.Platform", b =>
                 {
@@ -41,9 +56,8 @@ namespace GameInterfaceHub.Core.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("FileName")
                         .IsRequired()
@@ -69,6 +83,8 @@ namespace GameInterfaceHub.Core.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("PlatformId");
 
                     b.ToTable("Screenshots");
@@ -76,11 +92,19 @@ namespace GameInterfaceHub.Core.Migrations
 
             modelBuilder.Entity("GameInterfaceHub.Core.Models.Screenshot", b =>
                 {
+                    b.HasOne("GameInterfaceHub.Core.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GameInterfaceHub.Core.Models.Platform", "Platform")
                         .WithMany()
                         .HasForeignKey("PlatformId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("Platform");
                 });

@@ -9,4 +9,5 @@ public class AppDbContext : DbContext
 
     public DbSet<Screenshot> Screenshots => Set<Screenshot>();
     public DbSet<Platform> Platforms => Set<Platform>();
+    public DbSet<Category> Categories => Set<Category>();
 }

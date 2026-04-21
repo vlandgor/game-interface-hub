@@ -194,3 +194,9 @@ main { flex: 1; background: #121212; padding: 30px; overflow-y: auto; }
     justify-content: center;
     z-index: 1000;
 }
+
+.filter-item.active {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}

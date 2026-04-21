@@ -2,49 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Admin - Game UI Hub</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f4f4f4; }
+        .admin-container { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #333; }
+        input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 200px; }
+        button { padding: 8px 12px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .btn-delete { background: #dc3545; margin-left: 10px; padding: 4px 8px; font-size: 0.8rem; }
+        ul { list-style: none; padding: 0; }
+        li { padding: 8px 0; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: space-between; max-width: 400px; }
+    </style>
 </head>
 <body>
+
 <div class="admin-container">
     <h2>Manage Platforms</h2>
-    <input type="text" id="new-platform-name" placeholder="Platform Name (e.g. PS5)">
+    <input type="text" id="new-platform-name" placeholder="e.g. PS5, PC, Mobile">
     <button onclick="addPlatform()">Add Platform</button>
-
     <ul id="platform-list"></ul>
 </div>
 
+<div class="admin-container">
+    <h2>Manage Categories</h2>
+    <input type="text" id="new-category-name" placeholder="e.g. HUD, Inventory, Menu">
+    <button onclick="addCategory()">Add Category</button>
+    <ul id="category-list"></ul>
+</div>
+
 <script>
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        loadPlatforms();
+        loadCategories();
+    });
+
+    // --- Platform Logic ---
     async function loadPlatforms() {
         const res = await fetch('/api/platforms');
         const platforms = await res.json();
         document.getElementById('platform-list').innerHTML = platforms.map(p => `
-            <li>${p.name} <button onclick="deletePlatform(${p.id})">Delete</button></li>
+            <li>${p.name || p.Name} <button class="btn-delete" onclick="deletePlatform(${p.id || p.Id})">Delete</button></li>
         `).join('');
     }
 
     async function addPlatform() {
-        const nameInput = document.getElementById('new-platform-name');
-        const name = nameInput.value;
-
-        if (!name) return;
+        const input = document.getElementById('new-platform-name');
+        if (!input.value) return;
 
         await fetch('/api/platforms', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // Use "Name" with a capital N to match your C# model property
-            body: JSON.stringify({ Name: name })
+            body: JSON.stringify({ Name: input.value })
         });
 
-        nameInput.value = ''; // Clear input
+        input.value = '';
         loadPlatforms();
     }
 
     async function deletePlatform(id) {
+        if (!confirm("Delete this platform?")) return;
         await fetch(`/api/platforms/${id}`, { method: 'DELETE' });
         loadPlatforms();
     }
 
-    loadPlatforms();
+    // --- Category Logic ---
+    async function loadCategories() {
+        const res = await fetch('/api/categories');
+        if (!res.ok) return;
+        const categories = await res.json();
+        document.getElementById('category-list').innerHTML = categories.map(c => `
+            <li>${c.name || c.Name} <button class="btn-delete" onclick="deleteCategory(${c.id || c.Id})">Delete</button></li>
+        `).join('');
+    }
+
+    async function addCategory() {
+        const input = document.getElementById('new-category-name');
+        if (!input.value) return;
+
+        await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ Name: input.value })
+        });
+
+        input.value = '';
+        loadCategories();
+    }
+
+    async function deleteCategory(id) {
+        if (!confirm("Delete this category?")) return;
+        await fetch(`/api/categories/${id}`, { method: 'DELETE' });
+        loadCategories();
+    }
 </script>
 </body>
 </html>
