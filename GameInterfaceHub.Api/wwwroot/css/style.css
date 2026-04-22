@@ -3,109 +3,141 @@ body {
     margin: 0;
     background: #121212;
     color: #efefef;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
 }
 
 header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 24px;
-    height: 56px;
+    padding: 0 40px;
+    height: 64px;
     background: #000;
     border-bottom: 1px solid #282828;
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-.logo { font-weight: 800; font-size: 0.9rem; letter-spacing: 1.5px; color: #fff; }
-nav { display: flex; align-items: center; gap: 20px; }
+/* Logo and Right action get equal basis to force center to be truly center */
+.logo {
+    font-weight: 800;
+    font-size: 0.9rem;
+    letter-spacing: 1.5px;
+    color: #fff;
+    flex: 1;
+}
+
+.header-center {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+}
+
+.header-right {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
 
 #platform-selector {
-    background: transparent;
-    color: #aaa;
+    background: #1c1c1c;
+    color: #efefef;
     border: 1px solid #333;
-    border-radius: 4px;
-    padding: 4px 8px;
+    border-radius: 6px;
+    padding: 8px 16px;
     font-size: 0.85rem;
     cursor: pointer;
+    min-width: 160px;
+    transition: border-color 0.2s;
 }
 
-.main-container { display: flex; flex: 1; overflow: hidden; }
-
-aside {
-    width: 240px;
-    background: #181818;
-    border-right: 1px solid #282828;
-    padding: 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
+#platform-selector:hover {
+    border-color: #4cc9f0;
 }
 
-.filter-section h4 {
-    font-size: 0.75rem;
-    text-transform: uppercase;
+.btn-admin-link {
+    text-decoration: none;
     color: #666;
-    letter-spacing: 1px;
-    margin: 0 0 12px 0;
-}
-
-/* Golden Ratio Upload Zone */
-#drop-zone {
-    width: 100%;
-    height: 150px; /* Golden Ratio proportion for 240px width */
-    border: 1px dashed #333;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #555;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background: #1c1c1c;
-    text-align: center;
     font-size: 0.8rem;
+    font-weight: 600;
 }
 
-#drop-zone.hover {
-    border: 2px dashed #4cc9f0 !important;
-    background: #1a262b !important;
-    color: #4cc9f0 !important;
+.btn-admin-link:hover { color: #fff; }
+
+.search-hero {
+    text-align: center;
+    padding: 80px 20px;
+    background: linear-gradient(to bottom, #181818, #121212);
 }
 
-.filter-item { font-size: 0.9rem; color: #bbb; margin-bottom: 8px; cursor: pointer; }
+.search-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
 
-main { flex: 1; background: #121212; padding: 30px; overflow-y: auto; }
+.search-bar-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+#search-input {
+    width: 100%;
+    padding: 20px 30px;
+    background: #1c1c1c;
+    border: 1px solid #333;
+    border-radius: 40px;
+    color: #fff;
+    font-size: 1.1rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    transition: all 0.3s ease;
+}
+
+#search-input:focus {
+    outline: none;
+    border-color: #4cc9f0;
+    background: #222;
+}
+
+main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding-bottom: 60px;
+}
 
 #gallery {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 32px;
+    padding: 0 40px;
 }
 
 .screenshot-card {
     background: #1c1c1c;
-    border-radius: 6px;
+    border-radius: 10px;
     overflow: hidden;
     border: 1px solid #282828;
+    cursor: pointer;
+    transition: transform 0.2s ease;
 }
+
+.screenshot-card:hover { transform: translateY(-5px); border-color: #444; }
 
 .card-preview {
     width: 100%;
     aspect-ratio: 16/9;
-    background: #252525;
     object-fit: cover;
     display: block;
 }
 
-.card-meta { padding: 12px; font-size: 0.85rem; }
+.card-meta { padding: 16px; font-size: 0.85rem; line-height: 1.5; }
 
-/* Staging Panel Overlay */
-#upload-panel {
+/* Panels and Overlays */
+.modal-overlay, #upload-panel {
     position: fixed;
     top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.85);
+    background: rgba(0, 0, 0, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -116,7 +148,7 @@ main { flex: 1; background: #121212; padding: 30px; overflow-y: auto; }
     background: #1c1c1c;
     padding: 30px;
     border-radius: 12px;
-    width: 450px;
+    width: 500px;
     border: 1px solid #333;
 }
 
@@ -129,74 +161,15 @@ main { flex: 1; background: #121212; padding: 30px; overflow-y: auto; }
     overflow: hidden;
 }
 
-#staging-preview { width: 100%; height: 100%; object-fit: contain; }
+#staging-preview, #detail-preview { width: 100%; height: 100%; object-fit: contain; }
 
 .form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-size: 0.75rem; color: #666; text-transform: uppercase; margin-bottom: 5px; }
+.form-group label { display: block; font-size: 0.7rem; color: #666; text-transform: uppercase; margin-bottom: 5px; }
 .form-group input, .form-group select {
-    width: 100%; padding: 10px; background: #121212; border: 1px solid #333; color: #fff; border-radius: 4px;
+    width: 100%; padding: 12px; background: #121212; border: 1px solid #333; color: #fff; border-radius: 6px;
 }
 
-.button-group { display: flex; gap: 10px; margin-top: 20px; }
-.btn-primary { flex: 1; padding: 12px; background: #4cc9f0; color: #000; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-.btn-secondary { flex: 1; padding: 12px; background: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-
-/* Tactile Button Feedback */
-.btn-primary:active, .btn-secondary:active {
-    transform: scale(0.98);
-}
-
-.btn-primary:hover {
-    background: #3eb5d9; /* Slightly darker blue on hover */
-}
-
-/* Cleaner Focus states for the Form */
-.form-group input:focus, .form-group select:focus {
-    outline: none;
-    border-color: #4cc9f0;
-}
-
-/* Ensure the Dropdown options match the theme */
-#input-platform option {
-    background: #1c1c1c;
-    color: #fff;
-}
-
-.btn-danger {
-    flex: 1;
-    padding: 12px;
-    background: #ff4d4d;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-danger:hover {
-    background: #cc0000;
-}
-
-.info-group p {
-    font-size: 0.9rem;
-    color: #bbb;
-    margin: 5px 0;
-}
-
-/* Ensure both panels share the same overlay style */
-.modal-overlay {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.filter-item.active {
-    background-color: #007bff;
-    color: white;
-    font-weight: bold;
-}
+.button-group { display: flex; gap: 10px; margin-top: 24px; }
+.btn-primary { flex: 1; padding: 12px; background: #4cc9f0; color: #000; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-secondary { flex: 1; padding: 12px; background: #333; color: #fff; border: none; border-radius: 6px; cursor: pointer; }
+.btn-danger { flex: 1; padding: 12px; background: #ff4d4d; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }

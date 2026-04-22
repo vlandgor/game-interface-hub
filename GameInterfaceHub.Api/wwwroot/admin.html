@@ -6,35 +6,69 @@
     <link rel="stylesheet" href="css/admin.css">
 </head>
 <body>
-<header style="height: 60px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px; background: white; border-bottom: 1px solid #e2e8f0; margin-bottom: 30px;">
-    <div style="display: flex; align-items: center; gap: 10px;">
-        <span style="font-weight: 800; letter-spacing: 1px; color: #1e293b;">ADMIN PANEL</span>
-        <span style="color: #cbd5e1;">|</span>
-        <span style="font-size: 0.85rem; color: #64748b;">Manage Metadata</span>
+<header>
+    <div class="header-left">
+        <span class="panel-title">ADMIN PANEL</span>
+        <span class="divider">|</span>
+        <span class="subtitle">Content Management</span>
     </div>
-
     <nav>
-        <a href="index.html" style="text-decoration: none; font-size: 0.85rem; color: #2563eb; font-weight: 600;">← BACK TO HUB</a>
+        <a href="index.html" class="back-link">← BACK TO HUB</a>
     </nav>
 </header>
 
 <div class="admin-grid">
     <div class="admin-card">
-        <h2>Manage Platforms</h2>
+        <h2>Platforms</h2>
         <div class="input-group">
-            <input type="text" id="new-platforms-name" placeholder="e.g. PS5, PC, Mobile">
-            <button id="add-platform-btn">Add Platform</button>
+            <input type="text" id="new-platforms-name" placeholder="e.g. PS5, PC">
+            <button id="add-platform-btn">Add</button>
         </div>
         <ul id="platforms-list" class="list-container"></ul>
     </div>
 
     <div class="admin-card">
-        <h2>Manage Categories</h2>
+        <h2>Categories</h2>
         <div class="input-group">
-            <input type="text" id="new-categories-name" placeholder="e.g. HUD, Inventory, Menu">
-            <button id="add-category-btn">Add Category</button>
+            <input type="text" id="new-categories-name" placeholder="e.g. HUD, Menu">
+            <button id="add-category-btn">Add</button>
         </div>
         <ul id="categories-list" class="list-container"></ul>
+    </div>
+
+    <div class="admin-card upload-section">
+        <h2>Upload New UI</h2>
+
+        <div id="drop-zone" class="drop-zone">
+            <span>Click or Drop Screenshot</span>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
+
+        <div id="upload-form-container" style="display: none; margin-top: 20px;">
+            <div class="preview-mini">
+                <img id="staging-preview" src="" alt="Preview">
+            </div>
+
+            <div class="form-group">
+                <label>Game Title</label>
+                <input type="text" id="input-game-title" placeholder="e.g. RoboTag">
+            </div>
+
+            <div class="form-group">
+                <label>Platform</label>
+                <select id="input-platform"></select>
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+                <select id="input-category"></select>
+            </div>
+
+            <div class="button-group">
+                <button id="btn-cancel" class="btn-alt">Cancel</button>
+                <button id="btn-confirm-upload">Upload to Hub</button>
+            </div>
+        </div>
     </div>
 </div>
 
