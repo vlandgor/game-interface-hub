@@ -115,3 +115,47 @@ document.addEventListener('DOMContentLoaded', () => {
     if (elements.btnCloseDetail) elements.btnCloseDetail.onclick = () => elements.detailPanel.style.display = 'none';
     if (elements.btnCancelUpload) elements.btnCancelUpload.onclick = () => elements.uploadPanel.style.display = 'none';
 });
+
+let activeTags = [];
+
+elements.searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const val = e.target.value.trim().replace('#', '');
+        if (val && !activeTags.includes(val)) {
+            activeTags.push(val);
+            renderTags();
+            filterAndRender();
+        }
+        e.target.value = '';
+    }
+});
+
+function renderTags() {
+    const container = document.getElementById('active-tags-list');
+    container.innerHTML = activeTags.map(tag => `
+        <div class="tag-chip">
+            #${tag}
+            <span class="remove-tag" onclick="removeTag('${tag}')">&times;</span>
+        </div>
+    `).join('');
+}
+
+window.removeTag = (tag) => {
+    activeTags = activeTags.filter(t => t !== tag);
+    renderTags();
+    filterAndRender();
+};
+
+function filterAndRender() {
+    const term = elements.searchInput.value.toLowerCase();
+    const filtered = currentScreenshots.filter(s => {
+        const matchesTitle = s.gameTitle.toLowerCase().includes(term);
+        // Backend stores Tags as a comma-separated string or array
+        const screenshotTags = (s.tags || '').toLowerCase().split(',');
+        const matchesTags = activeTags.length === 0 ||
+            activeTags.every(t => screenshotTags.some(st => st.trim() === t.toLowerCase()));
+
+        return matchesTitle && matchesTags;
+    });
+    renderGallery(filtered);
+}
